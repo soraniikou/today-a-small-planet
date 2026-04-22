@@ -433,7 +433,7 @@ function getIdealCameraZ(scene) {
 
   // Scale up (pull camera back) for mobile/portrait
   if (isMobile && isPortrait) {
-    return base * 1.6; // pull back 60% on mobile portrait
+    return base * 2.0; // pull back on mobile portrait (smaller earth on screen)
   } else if (isPortrait) {
     return base * 1.3;
   } else if (isMobile) {
