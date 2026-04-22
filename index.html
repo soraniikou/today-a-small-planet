@@ -417,6 +417,31 @@ let thoughtLights = [];
 let arcLines = [];
 let openingTriggered = false;
 
+function getIdealCameraZ(scene) {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const isMobile = w < 768;
+  const isPortrait = h > w;
+
+  // Base distances for desktop
+  let base;
+  if (scene === 'earth') base = 8;
+  else if (scene === 'think') base = 7;
+  else if (scene === 'message') base = 7;
+  else if (scene === 'future') base = 11;
+  else base = 15;
+
+  // Scale up (pull camera back) for mobile/portrait
+  if (isMobile && isPortrait) {
+    return base * 1.6; // pull back 60% on mobile portrait
+  } else if (isPortrait) {
+    return base * 1.3;
+  } else if (isMobile) {
+    return base * 1.3;
+  }
+  return base;
+}
+
 // ============ Audio (Tone.js-less ambient) ============
 let audioCtx;
 let masterGain;
@@ -510,7 +535,9 @@ function init() {
   scene.fog = new THREE.FogExp2(0x000000, 0.02);
 
   camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-  camera.position.z = 15;
+  const startZ = getIdealCameraZ('opening');
+  camera.position.z = startZ;
+  cameraZ = cameraTargetZ = startZ;
 
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -912,6 +939,16 @@ function onResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  const farZ = getIdealCameraZ('opening');
+  if (currentScene === 'zoom') {
+    const eased = Math.min(earth.scale.x, 1);
+    const nearZ = getIdealCameraZ('earth');
+    cameraTargetZ = farZ - eased * (farZ - nearZ);
+  } else if (currentScene === 'opening') {
+    cameraTargetZ = farZ;
+  } else {
+    cameraTargetZ = getIdealCameraZ(currentScene);
+  }
 }
 
 // ============ Scene transitions ============
@@ -958,7 +995,9 @@ window.goToZoom = function() {
     earth.scale.setScalar(scale);
     clouds.scale.setScalar(scale);
     atmosphere.scale.setScalar(scale);
-    cameraTargetZ = 15 - eased * 7;
+    const farZ = getIdealCameraZ('opening');
+    const targetZ = getIdealCameraZ('earth');
+    cameraTargetZ = farZ - eased * (farZ - targetZ);
     if (t < 1) requestAnimationFrame(animateScale);
   };
   animateScale();
@@ -966,12 +1005,12 @@ window.goToZoom = function() {
 
 window.goToEarth = function() {
   showScene('earth');
-  cameraTargetZ = 8;
+  cameraTargetZ = getIdealCameraZ('earth');
 };
 
 window.goToThink = function() {
   showScene('think');
-  cameraTargetZ = 7;
+  cameraTargetZ = getIdealCameraZ('think');
   setTimeout(() => {
     document.getElementById('name-input').focus();
   }, 500);
@@ -991,6 +1030,7 @@ window.sendThought = function() {
   msgEl.innerHTML = `あなたの想いは、<br>今、<span class="highlight">${escapeHtml(displayName)}</span>へ<br>地球をひと巡りしました。`;
 
   showScene('message');
+  cameraTargetZ = getIdealCameraZ('message');
   msgEl.classList.remove('show');
   void msgEl.offsetWidth;
   msgEl.classList.add('show');
@@ -1080,7 +1120,7 @@ function createGlowTexture() {
 
 window.goToFuture = function() {
   showScene('future');
-  cameraTargetZ = 11;
+  cameraTargetZ = getIdealCameraZ('future');
   // Cycle future texts
   const futureEl = document.getElementById('future-text');
   const futures = [
@@ -1117,7 +1157,7 @@ window.restart = function() {
   earth.scale.setScalar(0.001);
   clouds.scale.setScalar(0.001);
   atmosphere.scale.setScalar(0.001);
-  cameraTargetZ = 15;
+  cameraTargetZ = getIdealCameraZ('opening');
   // Restore tap layer
   const tapLayer = document.getElementById('tap-layer');
   tapLayer.style.display = 'block';
