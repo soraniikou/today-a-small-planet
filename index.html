@@ -81,7 +81,7 @@
     pointer-events: auto;
   }
 
-  /* ============ Scene 1: ???? ============ */
+  /* ============ Scene 1: ?? ============ */
   #scene-opening .line1 {
     display: none;
     font-size: clamp(1rem, 4vw, 1.5rem);
@@ -282,6 +282,34 @@
     text-transform: lowercase;
   }
 
+  #scene-future .future-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  #scene-future .future-audio-link {
+    font-size: 0.85rem;
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    line-height: 1.5;
+    color: #fff;
+    text-decoration: none;
+    opacity: 0;
+    max-width: min(34em, 92vw);
+    transition: opacity 0.5s ease;
+    animation: futureLinkReveal 2s ease 6s forwards;
+  }
+
+  #scene-future .future-audio-link:hover {
+    opacity: 1;
+  }
+
+  @keyframes futureLinkReveal {
+    to { opacity: 0.6; }
+  }
+
   /* ============ Restart ============ */
   .restart {
     position: absolute;
@@ -312,7 +340,6 @@
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     mix-blend-mode: overlay;
   }
-
 </style>
 </head>
 <body>
@@ -320,10 +347,10 @@
 <div id="app">
   <canvas id="canvas"></canvas>
 
-  <!-- Scene 1: ???? -->
+  <!-- Scene 1: ?? -->
   <div class="overlay active" id="scene-opening">
     <div class="line1"></div>
-    <div class="line2">??? ?????????????????????</div>
+    <div class="line2">? ????????????</div>
     <div class="tap-hint">tap to begin</div>
   </div>
   <div id="tap-layer"></div>
@@ -345,7 +372,7 @@
   <!-- Scene 4: Think of someone -->
   <div class="overlay" id="scene-think">
     <div class="prompt">
-      ??????????????????????
+      ?????????????
     </div>
     <input type="text" id="name-input" placeholder="write a name, or a memory, a wish" maxlength="40">
     <button class="next-btn" id="send-btn" style="opacity:1;animation:none;">send</button>
@@ -358,11 +385,11 @@
 
   <!-- Scene 6: Future -->
   <div class="overlay" id="scene-future">
-    <div class="top">one year, ten years, a thousand years from now ???</div>
+    <div class="top">one year, ten years, a thousand years from now ?</div>
     <div class="center" id="future-text">
-      ?????????????<br>????????????????<br>?????????????
+      ???????<br>?????????<br>??????
     </div>
-    <div class="bottom">??? earth day, 2026</div>
+    <div class="bottom">? earth day, 2026</div>
   </div>
 
   <button class="restart" id="restart-btn">back</button>
@@ -620,7 +647,7 @@ function createEarthTexture() {
     ctx.fill();
   }
 
-  // Luminous soft green ??? smooth flowing mist (reference: bright lime, no hard edges)
+  // Luminous soft green ? smooth flowing mist (reference: bright lime, no hard edges)
   drawLuminousFlowingGreen(ctx, 2048, 1024);
 
   // Polar ice
@@ -755,7 +782,7 @@ function createNightTexture() {
   ctx.fillStyle = '#020612';
   ctx.fillRect(0, 0, 1024, 512);
 
-  // City lights clusters ??? suggestive of inhabited continents
+  // City lights clusters ? suggestive of inhabited continents
   const lightClusters = [
     { x: 625, y: 250, count: 200, spread: 80 }, // Africa
     { x: 650, y: 180, count: 400, spread: 120 }, // Europe/Asia
@@ -852,7 +879,7 @@ function setupInteraction() {
   canvas.addEventListener('touchmove', (e) => { e.preventDefault(); onMove(e); }, { passive: false });
   canvas.addEventListener('touchend', onUp);
 
-  // Opening tap ??? dedicated tap layer, always on top, cannot fail
+  // Opening tap ? dedicated tap layer, always on top, cannot fail
   const tapLayer = document.getElementById('tap-layer');
   const handleOpeningTap = (e) => {
     if (openingTriggered || currentScene !== 'opening') return;
@@ -896,10 +923,10 @@ window.goToZoom = function() {
   // Start zoom-in animation: earth scales up from tiny
   const zoomText = document.getElementById('zoom-text');
   const lines = [
-    '?????????????',
-    '?????????????????????',
-    '???????',
-    '?????????????????'
+    '?????',
+    '????????',
+    '????',
+    '????????'
   ];
   let idx = 0;
   zoomText.innerHTML = '';
@@ -951,15 +978,15 @@ window.goToThink = function() {
 window.sendThought = function() {
   const input = document.getElementById('name-input');
   const name = input.value.trim();
-  // Proceed even if empty ??? you can still just "think" of someone
+  // Proceed even if empty ? you can still just "think" of someone
 
   // Spawn a light on earth surface
   spawnThoughtLight();
 
   // Show message
   const msgEl = document.getElementById('msg-text');
-  const displayName = name || '????';
-  msgEl.innerHTML = `???????????????<br>?????<span class="highlight">${escapeHtml(displayName)}</span>?<br>????????????????????????`;
+  const displayName = name || '???';
+  msgEl.innerHTML = `????????<br>??<span class="highlight">${escapeHtml(displayName)}</span>?<br>????????????`;
 
   showScene('message');
   cameraTargetZ = getIdealCameraZ('message');
@@ -1055,8 +1082,8 @@ window.goToFuture = function() {
   // Cycle future texts
   const futureEl = document.getElementById('future-text');
   const futures = [
-    '?????????????<br>????????????????<br>?????????????',
-    '???????<br>???????????????<br>?????????????????<br>???????????????'
+    '???????<br>?????????<br>??????',
+    '????<br>???????<br>????????<br>??????'
   ];
   let i = 0;
   const cycle = () => {
