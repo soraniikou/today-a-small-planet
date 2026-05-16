@@ -60,8 +60,7 @@
   /* Inner interactive elements re-enable pointer events */
   .overlay.active button,
   .overlay.active input,
-  .overlay.active .tap-hint,
-  .overlay.active a {
+  .overlay.active .tap-hint {
     pointer-events: auto;
   }
 
@@ -82,7 +81,7 @@
     pointer-events: auto;
   }
 
-  /* ============ Scene 1: 日常 ============ */
+  /* ============ Scene 1: ???? ============ */
   #scene-opening .line1 {
     display: none;
     font-size: clamp(1rem, 4vw, 1.5rem);
@@ -283,34 +282,6 @@
     text-transform: lowercase;
   }
 
-  #scene-future .future-footer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.25rem;
-  }
-
-  #scene-future .future-audio-link {
-    font-size: 0.85rem;
-    font-weight: 300;
-    letter-spacing: 0.06em;
-    line-height: 1.5;
-    color: #fff;
-    text-decoration: none;
-    opacity: 0;
-    max-width: min(34em, 92vw);
-    transition: opacity 0.5s ease;
-    animation: futureLinkReveal 2s ease 6s forwards;
-  }
-
-  #scene-future .future-audio-link:hover {
-    opacity: 1;
-  }
-
-  @keyframes futureLinkReveal {
-    to { opacity: 0.6; }
-  }
-
   /* ============ Restart ============ */
   .restart {
     position: absolute;
@@ -342,29 +313,6 @@
     mix-blend-mode: overlay;
   }
 
-  /* ============ Sound toggle ============ */
-  .sound-toggle {
-    display: none;
-    position: absolute;
-    top: 3vh;
-    right: 4vw;
-    background: transparent;
-    border: 1px solid rgba(245, 239, 227, 0.2);
-    color: #8a8578;
-    font-family: inherit;
-    font-size: 0.65rem;
-    letter-spacing: 0.25em;
-    padding: 0.5rem 0.9rem;
-    cursor: pointer;
-    z-index: 50;
-    transition: all 0.3s ease;
-    border-radius: 2px;
-    text-transform: lowercase;
-  }
-  .sound-toggle:hover {
-    color: #f5efe3;
-    border-color: rgba(245, 239, 227, 0.5);
-  }
 </style>
 </head>
 <body>
@@ -372,10 +320,10 @@
 <div id="app">
   <canvas id="canvas"></canvas>
 
-  <!-- Scene 1: 日常 -->
+  <!-- Scene 1: ???? -->
   <div class="overlay active" id="scene-opening">
     <div class="line1"></div>
-    <div class="line2">— あなたは何をしていますか</div>
+    <div class="line2">??? ?????????????????????</div>
     <div class="tap-hint">tap to begin</div>
   </div>
   <div id="tap-layer"></div>
@@ -397,7 +345,7 @@
   <!-- Scene 4: Think of someone -->
   <div class="overlay" id="scene-think">
     <div class="prompt">
-      誰かを思い浮かべてください
+      ??????????????????????
     </div>
     <input type="text" id="name-input" placeholder="write a name, or a memory, a wish" maxlength="40">
     <button class="next-btn" id="send-btn" style="opacity:1;animation:none;">send</button>
@@ -410,23 +358,14 @@
 
   <!-- Scene 6: Future -->
   <div class="overlay" id="scene-future">
-    <div class="top">one year, ten years, a thousand years from now —</div>
+    <div class="top">one year, ten years, a thousand years from now ???</div>
     <div class="center" id="future-text">
-      地球は少しだけ<br>やさしくなっている<br>かもしれない
+      ?????????????<br>????????????????<br>?????????????
     </div>
-    <div class="future-footer">
-      <div class="bottom">— earth day, 2026</div>
-      <a
-        class="future-audio-link"
-        href="https://stand.fm/episodes/69e5c191a1cca69f435827c4"
-        target="_blank"
-        rel="noopener noreferrer"
-      >🎵 Listen to &quot;Spinning Globe&quot; — my acapella</a>
-    </div>
+    <div class="bottom">??? earth day, 2026</div>
   </div>
 
   <button class="restart" id="restart-btn">back</button>
-  <button class="sound-toggle" id="sound-btn">♪ sound off</button>
   <div class="grain"></div>
 </div>
 
@@ -479,92 +418,6 @@ function getIdealCameraZ(scene) {
   }
   return base;
 }
-
-// ============ Audio (Tone.js-less ambient) ============
-let audioCtx;
-let masterGain;
-let soundOn = false;
-let ambientNodes = [];
-
-function initAudio() {
-  if (audioCtx) return;
-  try {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    masterGain = audioCtx.createGain();
-    masterGain.gain.value = 0;
-    masterGain.connect(audioCtx.destination);
-  } catch(e) { console.log('audio unavailable'); }
-}
-
-function startAmbient() {
-  if (!audioCtx) return;
-  // Gentle drone: two detuned sine waves + slow LFO
-  const freqs = [110, 164.81, 220]; // A2, E3, A3
-  freqs.forEach((f, i) => {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    const lfo = audioCtx.createOscillator();
-    const lfoGain = audioCtx.createGain();
-
-    osc.type = 'sine';
-    osc.frequency.value = f;
-
-    lfo.frequency.value = 0.1 + i * 0.05;
-    lfoGain.gain.value = 0.015;
-    lfo.connect(lfoGain);
-    lfoGain.connect(gain.gain);
-
-    gain.gain.value = 0.04 - i * 0.01;
-    osc.connect(gain);
-    gain.connect(masterGain);
-    osc.start();
-    lfo.start();
-    ambientNodes.push(osc, lfo);
-  });
-  // Fade in
-  masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
-  masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
-  masterGain.gain.linearRampToValueAtTime(0.6, audioCtx.currentTime + 3);
-}
-
-function playChime() {
-  if (!audioCtx || !soundOn) return;
-  const now = audioCtx.currentTime;
-  [523.25, 659.25, 783.99].forEach((freq, i) => { // C5 E5 G5
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.value = freq;
-    gain.gain.setValueAtTime(0, now + i * 0.15);
-    gain.gain.linearRampToValueAtTime(0.08, now + i * 0.15 + 0.05);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.15 + 2);
-    osc.connect(gain);
-    gain.connect(masterGain);
-    osc.start(now + i * 0.15);
-    osc.stop(now + i * 0.15 + 2);
-  });
-}
-
-window.toggleSound = function() {
-  initAudio();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-  soundOn = !soundOn;
-  const btn = document.getElementById('sound-btn');
-  if (soundOn) {
-    if (ambientNodes.length === 0) startAmbient();
-    else {
-      masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
-      masterGain.gain.linearRampToValueAtTime(0.6, audioCtx.currentTime + 1.5);
-    }
-    btn.textContent = '♪ sound on';
-  } else {
-    if (masterGain) {
-      masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
-      masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1);
-    }
-    btn.textContent = '♪ sound off';
-  }
-};
 
 // ============ Three.js setup ============
 function init() {
@@ -767,7 +620,7 @@ function createEarthTexture() {
     ctx.fill();
   }
 
-  // Luminous soft green — smooth flowing mist (reference: bright lime, no hard edges)
+  // Luminous soft green ??? smooth flowing mist (reference: bright lime, no hard edges)
   drawLuminousFlowingGreen(ctx, 2048, 1024);
 
   // Polar ice
@@ -902,7 +755,7 @@ function createNightTexture() {
   ctx.fillStyle = '#020612';
   ctx.fillRect(0, 0, 1024, 512);
 
-  // City lights clusters — suggestive of inhabited continents
+  // City lights clusters ??? suggestive of inhabited continents
   const lightClusters = [
     { x: 625, y: 250, count: 200, spread: 80 }, // Africa
     { x: 650, y: 180, count: 400, spread: 120 }, // Europe/Asia
@@ -999,7 +852,7 @@ function setupInteraction() {
   canvas.addEventListener('touchmove', (e) => { e.preventDefault(); onMove(e); }, { passive: false });
   canvas.addEventListener('touchend', onUp);
 
-  // Opening tap — dedicated tap layer, always on top, cannot fail
+  // Opening tap ??? dedicated tap layer, always on top, cannot fail
   const tapLayer = document.getElementById('tap-layer');
   const handleOpeningTap = (e) => {
     if (openingTriggered || currentScene !== 'opening') return;
@@ -1007,8 +860,6 @@ function setupInteraction() {
     if (e) e.preventDefault();
     // Remove the tap layer so it doesn't block later interactions
     tapLayer.style.display = 'none';
-    initAudio();
-    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     goToZoom();
   };
   tapLayer.addEventListener('click', handleOpeningTap);
@@ -1045,10 +896,10 @@ window.goToZoom = function() {
   // Start zoom-in animation: earth scales up from tiny
   const zoomText = document.getElementById('zoom-text');
   const lines = [
-    '部屋から、',
-    '街から、国から、',
-    'そして、',
-    'この星が見えた。'
+    '?????????????',
+    '?????????????????????',
+    '???????',
+    '?????????????????'
   ];
   let idx = 0;
   zoomText.innerHTML = '';
@@ -1100,15 +951,15 @@ window.goToThink = function() {
 window.sendThought = function() {
   const input = document.getElementById('name-input');
   const name = input.value.trim();
-  // Proceed even if empty — you can still just "think" of someone
+  // Proceed even if empty ??? you can still just "think" of someone
 
   // Spawn a light on earth surface
   spawnThoughtLight();
 
   // Show message
   const msgEl = document.getElementById('msg-text');
-  const displayName = name || 'あの人';
-  msgEl.innerHTML = `あなたの想いは、<br>今、<span class="highlight">${escapeHtml(displayName)}</span>へ<br>地球をひと巡りしました。`;
+  const displayName = name || '????';
+  msgEl.innerHTML = `???????????????<br>?????<span class="highlight">${escapeHtml(displayName)}</span>?<br>????????????????????????`;
 
   showScene('message');
   cameraTargetZ = getIdealCameraZ('message');
@@ -1116,7 +967,6 @@ window.sendThought = function() {
   void msgEl.offsetWidth;
   msgEl.classList.add('show');
 
-  playChime();
 
   setTimeout(() => goToFuture(), 6000);
 };
@@ -1205,8 +1055,8 @@ window.goToFuture = function() {
   // Cycle future texts
   const futureEl = document.getElementById('future-text');
   const futures = [
-    '地球は少しだけ<br>やさしくなっている<br>かもしれない',
-    'あなたが<br>一瞬でも誰かを<br>思ったあの時間が<br>世界を変える'
+    '?????????????<br>????????????????<br>?????????????',
+    '???????<br>???????????????<br>?????????????????<br>???????????????'
   ];
   let i = 0;
   const cycle = () => {
@@ -1295,7 +1145,6 @@ function animate() {
 init();
 
 // Wire up all buttons (module scripts can't be called from onclick attrs)
-document.getElementById('sound-btn').addEventListener('click', toggleSound);
 document.getElementById('restart-btn').addEventListener('click', restart);
 document.getElementById('earth-next-btn').addEventListener('click', goToThink);
 document.getElementById('send-btn').addEventListener('click', sendThought);
