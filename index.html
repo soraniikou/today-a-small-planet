@@ -433,17 +433,18 @@
 
   .future-closing {
     position: absolute;
-    bottom: 9vh;
+    bottom: 6.2vh;
     left: 50%;
     transform: translateX(-50%);
     z-index: 12;
-    font-size: clamp(0.72rem, 2.6vw, 0.95rem);
+    font-size: clamp(0.62rem, 2.1vw, 0.88rem);
     font-weight: 300;
-    letter-spacing: 0.18em;
-    line-height: 2.2;
+    letter-spacing: 0.12em;
+    line-height: 1;
     color: #e8e2d6;
     text-align: center;
-    max-width: min(22em, 92vw);
+    white-space: nowrap;
+    max-width: 96vw;
     opacity: 0;
     transition: opacity 1.2s ease;
     pointer-events: none;
@@ -1230,7 +1231,7 @@ window.sendThought = function() {
 
   // Show message
   const msgEl = document.getElementById('msg-text');
-  msgEl.innerHTML = `あなたが誰かを想う瞬間に<br>思いが届く`;
+  msgEl.innerHTML = `あなたが誰かを想う瞬間に<br>想いが届く`;
 
   showScene('message');
   cameraTargetZ = getIdealCameraZ('message');
