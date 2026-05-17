@@ -90,23 +90,25 @@
   #shooting-stars {
     position: absolute;
     inset: 0;
-    z-index: 5;
+    z-index: 15;
     pointer-events: none;
     overflow: hidden;
   }
 
   .shooting-star-flight {
     position: absolute;
-    width: min(616vw, 3080px);
-    height: 1px;
+    width: min(88vw, 440px);
+    height: 2px;
     border-radius: 999px;
+    transform-origin: 0% 50%;
     background: linear-gradient(
       90deg,
       rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0.85) 50%,
+      rgba(255, 255, 255, 0.95) 42%,
+      rgba(255, 255, 255, 0.4) 72%,
       rgba(255, 255, 255, 0) 100%
     );
-    box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.4);
     opacity: 0;
     transform: rotate(var(--meteor-angle)) translateX(0);
     animation: meteorFly 6.4s ease-out forwards;
@@ -117,8 +119,8 @@
       opacity: 0;
       transform: rotate(var(--meteor-angle)) translateX(0);
     }
-    20% {
-      opacity: 0.9;
+    18% {
+      opacity: 1;
     }
     100% {
       opacity: 0;
@@ -923,17 +925,19 @@ function setupShootingStars() {
   const spawn = () => {
     const el = document.createElement('div');
     el.className = 'shooting-star-flight';
-    const angle = Math.random() * 360;
-    const travel = (336 + Math.random() * 504) + 'vw';
 
-    let leftPct, topPct;
-    if (Math.random() < 0.55) {
-      leftPct = 5 + Math.random() * 90;
-      topPct = 4 + Math.random() * 32;
-    } else {
-      leftPct = Math.random() < 0.5 ? 2 + Math.random() * 18 : 80 + Math.random() * 18;
-      topPct = 8 + Math.random() * 42;
-    }
+    const skyCenterX = 50;
+    const skyCenterY = 38;
+    const leftPct = 18 + Math.random() * 64;
+    const topPct = 8 + Math.random() * 34;
+
+    const dx = skyCenterX - leftPct;
+    const dy = (skyCenterY - topPct) * 1.15;
+    let angle = Math.atan2(dy, dx) * (180 / Math.PI);
+    angle += (Math.random() - 0.5) * 40;
+
+    const dist = Math.hypot(dx, dy);
+    const travel = (Math.min(62, Math.max(26, dist * 0.55 + 18 + Math.random() * 14))) + 'vw';
 
     el.style.left = leftPct + 'vw';
     el.style.top = topPct + 'vh';
