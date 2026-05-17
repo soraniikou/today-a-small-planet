@@ -349,6 +349,23 @@
     animation: fadeIn 3s ease 1.5s forwards;
   }
 
+  #scene-future .center.replacing {
+    animation: none;
+    max-width: none;
+    transition: opacity 1.6s ease;
+    opacity: 0;
+  }
+
+  #scene-future .center.is-closing {
+    animation: none;
+    opacity: 1;
+    max-width: none;
+    white-space: nowrap;
+    letter-spacing: 0.14em;
+    line-height: 1.6;
+    font-size: clamp(0.95rem, 3.4vw, 1.35rem);
+  }
+
   #scene-future .bottom {
     font-size: 0.75rem;
     letter-spacing: 0.4em;
@@ -431,29 +448,6 @@
   .restart.show { opacity: 1; }
   .restart:hover { color: #f5efe3; }
 
-  .future-closing {
-    position: absolute;
-    bottom: 6.2vh;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 12;
-    font-size: clamp(0.62rem, 2.1vw, 0.88rem);
-    font-weight: 300;
-    letter-spacing: 0.12em;
-    line-height: 1;
-    color: #e8e2d6;
-    text-align: center;
-    white-space: nowrap;
-    max-width: 96vw;
-    opacity: 0;
-    transition: opacity 1.2s ease;
-    pointer-events: none;
-  }
-
-  .future-closing.visible {
-    opacity: 1;
-  }
-
   /* ============ Grain overlay ============ */
   .grain {
     position: fixed;
@@ -504,7 +498,6 @@
     <div class="center" id="future-text">地球は少しだけ優しくなっているかもしれない</div>
   </div>
 
-  <div class="future-closing" id="future-closing" aria-live="polite"></div>
   <button class="restart" id="restart-btn">back</button>
   <div class="grain"></div>
 </div>
@@ -535,11 +528,13 @@ let arcLines = [];
 let openingTriggered = false;
 let futureBgStarted = false;
 let futureBgStartTime = 0;
-let futureClosingRevealed = false;
+let futureClosingStarted = false;
 let futureClosingTimer = null;
 
 const FUTURE_BG_MS = 12000;
-const FUTURE_CLOSING_TEXT = '全ての出来事が\u3000あなたに出会うためだった';
+const FUTURE_CHAR_MS = 285;
+const FUTURE_CLOSING_TEXT = '全ての出来事があなたに出会うためだった';
+const FUTURE_OPENING_TEXT = '地球は少しだけ優しくなっているかもしれない';
 const FUTURE_BG_STOPS = [
   { p: 0, hex: 0x000000 },
   { p: 0.25, hex: 0x1a0f2e },
@@ -585,47 +580,73 @@ function startFutureBgTransition() {
   if (futureBgStarted || currentScene !== 'future') return;
   futureBgStarted = true;
   futureBgStartTime = performance.now();
+  beginFutureClosingSequence();
+}
+
+function beginFutureClosingSequence() {
+  if (futureClosingStarted || currentScene !== 'future') return;
+  futureClosingStarted = true;
+
+  const el = document.getElementById('future-text');
+  if (!el) return;
+
+  let faded = false;
+  const startClosingType = () => {
+    if (faded) return;
+    faded = true;
+    el.classList.remove('replacing');
+    el.classList.add('is-closing');
+    el.textContent = '';
+    typewriteFutureClosing(el);
+  };
+
+  el.style.animation = 'none';
+  el.style.opacity = '1';
+  requestAnimationFrame(() => {
+    el.style.opacity = '';
+    el.classList.add('replacing');
+    el.addEventListener('transitionend', (e) => {
+      if (e.propertyName === 'opacity') startClosingType();
+    }, { once: true });
+    setTimeout(startClosingType, 1700);
+  });
+}
+
+function typewriteFutureClosing(el) {
+  let i = 0;
+  const step = () => {
+    if (currentScene !== 'future') return;
+    if (i >= FUTURE_CLOSING_TEXT.length) return;
+    el.textContent += FUTURE_CLOSING_TEXT[i];
+    i++;
+    futureClosingTimer = setTimeout(step, FUTURE_CHAR_MS);
+  };
+  step();
 }
 
 function updateFutureBackground() {
   if (!futureBgStarted || currentScene !== 'future') return;
   const progress = Math.min((performance.now() - futureBgStartTime) / FUTURE_BG_MS, 1);
   applySceneBackground(sampleFutureBg(progress));
-  if (progress >= 1 && !futureClosingRevealed) {
-    futureClosingRevealed = true;
-    revealFutureClosingText();
-  }
-}
-
-function revealFutureClosingText() {
-  const el = document.getElementById('future-closing');
-  if (!el) return;
-  el.textContent = '';
-  el.classList.add('visible');
-  let i = 0;
-  const step = () => {
-    if (i >= FUTURE_CLOSING_TEXT.length) return;
-    el.textContent += FUTURE_CLOSING_TEXT[i];
-    i++;
-    futureClosingTimer = setTimeout(step, 95);
-  };
-  step();
 }
 
 function resetFutureScreenEffects() {
   futureBgStarted = false;
   futureBgStartTime = 0;
-  futureClosingRevealed = false;
+  futureClosingStarted = false;
   if (futureClosingTimer) {
     clearTimeout(futureClosingTimer);
     futureClosingTimer = null;
   }
   document.body.style.background = '';
   applySceneBackground(0x000000);
-  const closing = document.getElementById('future-closing');
-  if (closing) {
-    closing.textContent = '';
-    closing.classList.remove('visible');
+  const futureEl = document.getElementById('future-text');
+  if (futureEl) {
+    futureEl.textContent = FUTURE_OPENING_TEXT;
+    futureEl.classList.remove('replacing', 'is-closing');
+    futureEl.style.animation = '';
+    futureEl.style.opacity = '';
+    futureEl.style.transition = '';
   }
 }
 
@@ -1326,10 +1347,11 @@ window.goToFuture = function() {
   showScene('future');
   cameraTargetZ = getIdealCameraZ('future');
   const futureEl = document.getElementById('future-text');
-  futureEl.innerHTML = '地球は少しだけ優しくなっているかもしれない';
-  futureEl.classList.remove('show');
-  void futureEl.offsetWidth;
-  futureEl.classList.add('show');
+  futureEl.textContent = FUTURE_OPENING_TEXT;
+  futureEl.classList.remove('replacing', 'is-closing');
+  futureEl.style.animation = '';
+  futureEl.style.opacity = '';
+  futureEl.style.transition = '';
 
   setTimeout(() => {
     document.querySelector('.restart').classList.add('show');
