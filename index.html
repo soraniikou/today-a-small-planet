@@ -81,7 +81,7 @@
     pointer-events: auto;
   }
 
-  /* ============ Scene 1: ?? ============ */
+  /* ============ Scene 1: 日常 ============ */
   #scene-opening .line1 {
     display: none;
     font-size: clamp(1rem, 4vw, 1.5rem);
@@ -347,10 +347,10 @@
 <div id="app">
   <canvas id="canvas"></canvas>
 
-  <!-- Scene 1: ?? -->
+  <!-- Scene 1: 日常 -->
   <div class="overlay active" id="scene-opening">
     <div class="line1"></div>
-    <div class="line2">? ????????????</div>
+    <div class="line2">— あなたは何をしていますか</div>
     <div class="tap-hint">tap to begin</div>
   </div>
   <div id="tap-layer"></div>
@@ -372,9 +372,9 @@
   <!-- Scene 4: Think of someone -->
   <div class="overlay" id="scene-think">
     <div class="prompt">
-      ?????????????
+      誰かを思い浮かべてください
     </div>
-    <input type="text" id="name-input" placeholder="write a name, or a memory, a wish" maxlength="40">
+    <input type="text" id="name-input" placeholder="名前や思い出を書いてください" maxlength="40">
     <button class="next-btn" id="send-btn" style="opacity:1;animation:none;">send</button>
   </div>
 
@@ -385,15 +385,15 @@
 
   <!-- Scene 6: Future -->
   <div class="overlay" id="scene-future">
-    <div class="top">one year, ten years, a thousand years from now ?</div>
+    <div class="top">one year, ten years, a thousand years from now —</div>
     <div class="center" id="future-text">
-      ???????<br>?????????<br>??????
+      地球は少しだけ<br>やさしくなっている<br>かもしれない
     </div>
-    <div class="bottom">? earth day, 2026</div>
+    <div class="bottom">— earth day, 2026</div>
   </div>
 
   <button class="restart" id="restart-btn">back</button>
-  <div class="grain"></div>
+<div class="grain"></div>
 </div>
 
 <script type="importmap">
@@ -647,7 +647,7 @@ function createEarthTexture() {
     ctx.fill();
   }
 
-  // Luminous soft green ? smooth flowing mist (reference: bright lime, no hard edges)
+  // Luminous soft green — smooth flowing mist (reference: bright lime, no hard edges)
   drawLuminousFlowingGreen(ctx, 2048, 1024);
 
   // Polar ice
@@ -782,7 +782,7 @@ function createNightTexture() {
   ctx.fillStyle = '#020612';
   ctx.fillRect(0, 0, 1024, 512);
 
-  // City lights clusters ? suggestive of inhabited continents
+  // City lights clusters — suggestive of inhabited continents
   const lightClusters = [
     { x: 625, y: 250, count: 200, spread: 80 }, // Africa
     { x: 650, y: 180, count: 400, spread: 120 }, // Europe/Asia
@@ -879,7 +879,7 @@ function setupInteraction() {
   canvas.addEventListener('touchmove', (e) => { e.preventDefault(); onMove(e); }, { passive: false });
   canvas.addEventListener('touchend', onUp);
 
-  // Opening tap ? dedicated tap layer, always on top, cannot fail
+  // Opening tap — dedicated tap layer, always on top, cannot fail
   const tapLayer = document.getElementById('tap-layer');
   const handleOpeningTap = (e) => {
     if (openingTriggered || currentScene !== 'opening') return;
@@ -923,10 +923,10 @@ window.goToZoom = function() {
   // Start zoom-in animation: earth scales up from tiny
   const zoomText = document.getElementById('zoom-text');
   const lines = [
-    '?????',
-    '????????',
-    '????',
-    '????????'
+    '部屋から、',
+    '街から、国から、',
+    'そして、',
+    'この星が見えた。',
   ];
   let idx = 0;
   zoomText.innerHTML = '';
@@ -978,15 +978,15 @@ window.goToThink = function() {
 window.sendThought = function() {
   const input = document.getElementById('name-input');
   const name = input.value.trim();
-  // Proceed even if empty ? you can still just "think" of someone
+  // Proceed even if empty — you can still just "think" of someone
 
   // Spawn a light on earth surface
   spawnThoughtLight();
 
   // Show message
   const msgEl = document.getElementById('msg-text');
-  const displayName = name || '???';
-  msgEl.innerHTML = `????????<br>??<span class="highlight">${escapeHtml(displayName)}</span>?<br>????????????`;
+  const displayName = name || 'あの人';
+  msgEl.innerHTML = `あなたの想いは、<br>今、<span class="highlight">${escapeHtml(displayName)}</span>へ<br>地球をひと巡りしました。`;
 
   showScene('message');
   cameraTargetZ = getIdealCameraZ('message');
@@ -1082,8 +1082,8 @@ window.goToFuture = function() {
   // Cycle future texts
   const futureEl = document.getElementById('future-text');
   const futures = [
-    '???????<br>?????????<br>??????',
-    '????<br>???????<br>????????<br>??????'
+    '地球は少しだけ<br>やさしくなっている<br>かもしれない',
+    'あなたが<br>一瞬でも誰かを<br>思ったあの時間が<br>世界を変える',
   ];
   let i = 0;
   const cycle = () => {
