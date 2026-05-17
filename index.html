@@ -386,6 +386,31 @@
     to { opacity: 0.6; }
   }
 
+
+  #scene-future .earth-spin-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 24vh;
+    transform: translateX(-50%);
+    z-index: 3;
+    font-size: 0.72rem;
+    letter-spacing: 0.35em;
+    color: #8a8578;
+    text-transform: lowercase;
+    font-family: 'Cormorant Garamond', serif;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #scene-future.active .earth-spin-hint {
+    animation: fadeIn 2s ease 3.5s forwards, spinHintPulse 2.5s ease 5.5s infinite;
+  }
+
+  @keyframes spinHintPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.85; }
+  }
+
   /* ============ Restart ============ */
   .restart {
     position: absolute;
@@ -452,6 +477,7 @@
 
   <!-- Scene 6: Future -->
   <div class="overlay" id="scene-future">
+    <div class="earth-spin-hint">spin →</div>
     <div class="center" id="future-text">地球は少しだけ優しくなっているかもしれない</div>
   </div>
 
