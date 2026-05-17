@@ -97,7 +97,7 @@
 
   .shooting-star-flight {
     position: absolute;
-    width: min(22vw, 110px);
+    width: min(154vw, 770px);
     height: 1px;
     border-radius: 999px;
     background: linear-gradient(
@@ -109,7 +109,7 @@
     box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.25);
     opacity: 0;
     transform: rotate(var(--meteor-angle)) translateX(0);
-    animation: meteorFly 0.8s ease-out forwards;
+    animation: meteorFly 3.2s ease-out forwards;
   }
 
   @keyframes meteorFly {
@@ -924,7 +924,7 @@ function setupShootingStars() {
     const el = document.createElement('div');
     el.className = 'shooting-star-flight';
     const angle = Math.random() * 360;
-    const travel = (12 + Math.random() * 18) + 'vw';
+    const travel = (84 + Math.random() * 126) + 'vw';
 
     let leftPct, topPct;
     if (Math.random() < 0.55) {
