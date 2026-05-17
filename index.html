@@ -1049,11 +1049,11 @@ window.goToZoom = function() {
 
   // Animate earth scale
   const startTime = performance.now();
-  const duration = 10000;
+  const duration = 30000;
   const animateScale = () => {
     const t = Math.min((performance.now() - startTime) / duration, 1);
     const eased = 1 - Math.pow(1 - t, 3);
-    const scale = eased;
+    const scale = eased * 0.8;
     earth.scale.setScalar(scale);
     clouds.scale.setScalar(scale);
     atmosphere.scale.setScalar(scale);
@@ -1083,8 +1083,7 @@ window.sendThought = function() {
 
   // Show message
   const msgEl = document.getElementById('msg-text');
-  const displayName = name || 'あの人';
-  msgEl.innerHTML = `あなたが誰かを想う瞬間に<br><span class="highlight">${escapeHtml(displayName)}</span>さんに届きました`;
+  msgEl.innerHTML = `あなたが誰かを想う瞬間に<br>思いが届く`;
 
   showScene('message');
   cameraTargetZ = getIdealCameraZ('message');
