@@ -628,7 +628,10 @@ function typewriteFutureClosing(el) {
   let i = 0;
   const step = () => {
     if (currentScene !== 'future') return;
-    if (i >= FUTURE_CLOSING_TEXT.length) return;
+    if (i >= FUTURE_CLOSING_TEXT.length) {
+      document.querySelector('.restart').classList.add('show');
+      return;
+    }
     el.textContent += FUTURE_CLOSING_TEXT[i];
     i++;
     futureClosingTimer = setTimeout(step, FUTURE_CHAR_MS);
@@ -1377,9 +1380,7 @@ window.goToFuture = function() {
   futureEl.style.opacity = '';
   futureEl.style.transition = '';
 
-  setTimeout(() => {
-    document.querySelector('.restart').classList.add('show');
-  }, 6000);
+  document.querySelector('.restart').classList.remove('show');
 };
 
 window.restart = function() {
