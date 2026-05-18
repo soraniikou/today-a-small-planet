@@ -483,7 +483,7 @@
     <div class="prompt">
       あなたが思う名前、思うことを書いてください
     </div>
-    <input type="text" id="name-input" placeholder="名前や思い出を書いてください" maxlength="40">
+    <input type="text" id="name-input" maxlength="40">
     <button class="next-btn" id="send-btn" style="opacity:1;animation:none;">send</button>
   </div>
 
@@ -583,9 +583,16 @@ function startFutureBgTransition() {
   beginFutureClosingSequence();
 }
 
+function setEarthLandPink(active) {
+  if (earth && earth.material && earth.material.uniforms.landPinkMix) {
+    earth.material.uniforms.landPinkMix.value = active ? 1 : 0;
+  }
+}
+
 function beginFutureClosingSequence() {
   if (futureClosingStarted || currentScene !== 'future') return;
   futureClosingStarted = true;
+  setEarthLandPink(true);
 
   const el = document.getElementById('future-text');
   if (!el) return;
@@ -640,6 +647,7 @@ function resetFutureScreenEffects() {
   }
   document.body.style.background = '';
   applySceneBackground(0x000000);
+  setEarthLandPink(false);
   const futureEl = document.getElementById('future-text');
   if (futureEl) {
     futureEl.textContent = FUTURE_OPENING_TEXT;
@@ -741,7 +749,8 @@ function init() {
       dayMap: { value: earthTexture },
       nightMap: { value: nightTexture },
       sunDirection: { value: new THREE.Vector3(5, 2, 5).normalize() },
-      time: { value: 0 }
+      time: { value: 0 },
+      landPinkMix: { value: 0 }
     },
     vertexShader: `
       varying vec2 vUv;
@@ -760,6 +769,7 @@ function init() {
       uniform sampler2D nightMap;
       uniform vec3 sunDirection;
       uniform float time;
+      uniform float landPinkMix;
       varying vec2 vUv;
       varying vec3 vNormal;
       varying vec3 vWorldPos;
@@ -770,6 +780,12 @@ function init() {
         float mixer = smoothstep(-0.2, 0.2, sunDot);
 
         vec3 dayCol = texture2D(dayMap, vUv).rgb;
+        float greenness = dayCol.g - max(dayCol.r, dayCol.b);
+        float isLand = smoothstep(0.06, 0.18, greenness);
+        float lum = dot(dayCol, vec3(0.299, 0.587, 0.114));
+        vec3 palePink = vec3(0.94, 0.82, 0.86) * (0.55 + lum * 0.65);
+        dayCol = mix(dayCol, palePink, isLand * landPinkMix);
+
         vec3 nightCol = texture2D(nightMap, vUv).rgb;
 
         // Soft terminator warmth
