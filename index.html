@@ -908,14 +908,17 @@ function setupAudioEndedHandler() {
       startFutureBgTransition();
     }
 
-    // フェードアウト（歌の余韻を残す）
+    // フェードアウト（カチッ音を回避するため、よりゆっくり丁寧に）
     const fadeOut = () => {
-      if (bgm.volume > 0.02) {
-        bgm.volume = Math.max(0, bgm.volume - 0.02);
-        setTimeout(fadeOut, 150);
+      if (bgm.volume > 0.005) {
+        bgm.volume = Math.max(0, bgm.volume - 0.01);
+        setTimeout(fadeOut, 200);
       } else {
         bgm.volume = 0;
-        bgm.pause();
+        // 完全に無音になってから少し待ってpause（カチッ音回避）
+        setTimeout(() => {
+          bgm.pause();
+        }, 500);
       }
     };
     fadeOut();
@@ -1476,7 +1479,8 @@ function animate() {
     if (!isDragging) {
       rotationVelocity *= 0.95;
       // 自動スピン中はやさしい速度を維持
-      const autoSpin = (currentScene === 'future' && autoSpinActive) ? 0.006 : 0.0008;
+      // 自動スピン中はやさしい速度を維持（3倍ゆっくり: 0.006 → 0.002）
+      const autoSpin = (currentScene === 'future' && autoSpinActive) ? 0.002 : 0.0008;
       earth.rotation.y += autoSpin + rotationVelocity;
       clouds.rotation.y += autoSpin * 1.2 + rotationVelocity * 0.9;
     } else {
