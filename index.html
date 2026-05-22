@@ -449,6 +449,16 @@
   .restart.show { opacity: 1; }
   .restart:hover { color: #f5efe3; }
 
+  /* スマホでは back ボタンを左下に移動（JASRAC表記と被らないように） */
+  @media (max-width: 767px) {
+    .restart {
+      left: 1.5vw;
+      bottom: 1.5vh;
+      transform: none;
+      padding: 0.5rem 0.8rem;
+    }
+  }
+
   /* ============ JASRAC credit ============ */
   .jasrac-credit {
     position: absolute;
@@ -468,7 +478,7 @@
   }
 
   .jasrac-mark {
-    width: 28px;
+    width: 52px;
     height: auto;
     display: block;
   }
