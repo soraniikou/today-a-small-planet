@@ -54,10 +54,9 @@
     opacity: 1;
     visibility: visible;
     transition: opacity 1s ease, visibility 0s linear 0s;
-    pointer-events: none; /* overlay itself never blocks */
+    pointer-events: none;
   }
 
-  /* Inner interactive elements re-enable pointer events */
   .overlay.active button,
   .overlay.active input,
   .overlay.active .tap-hint {
@@ -448,6 +447,20 @@
   .restart.show { opacity: 1; }
   .restart:hover { color: #f5efe3; }
 
+  /* ============ JASRAC credit ============ */
+  .jasrac-credit {
+    position: absolute;
+    bottom: 1vh;
+    right: 1vw;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    color: #6a6558;
+    opacity: 0.5;
+    z-index: 50;
+    pointer-events: none;
+    font-family: 'Shippori Mincho', serif;
+  }
+
   /* ============ Grain overlay ============ */
   .grain {
     position: fixed;
@@ -464,6 +477,7 @@
 
 <div id="app">
   <canvas id="canvas"></canvas>
+  <audio id="bgm" src="audio/your-acapella.mp3" preload="auto"></audio>
   <div id="shooting-stars" aria-hidden="true"></div>
 
   <!-- Scene 1: 日常 -->
@@ -499,6 +513,7 @@
   </div>
 
   <button class="restart" id="restart-btn">back</button>
+  <div class="jasrac-credit">JASRAC許諾第J260543281号</div>
   <div class="grain"></div>
 </div>
 
@@ -531,6 +546,7 @@ let futureBgStarted = false;
 let futureBgStartTime = 0;
 let futureClosingStarted = false;
 let futureClosingTimer = null;
+let autoSpinActive = false;
 
 const FUTURE_BG_MS = 12000;
 const FUTURE_CHAR_MS = 285;
@@ -649,6 +665,7 @@ function resetFutureScreenEffects() {
   futureBgStarted = false;
   futureBgStartTime = 0;
   futureClosingStarted = false;
+  autoSpinActive = false;
   if (futureClosingTimer) {
     clearTimeout(futureClosingTimer);
     futureClosingTimer = null;
@@ -873,7 +890,36 @@ function init() {
   window.addEventListener('resize', onResize);
   setupInteraction();
   setupShootingStars();
+  setupAudioEndedHandler();
   animate();
+}
+
+// ============ Audio: 歌が終わったら必ず愛のあらわれを起動 ============
+function setupAudioEndedHandler() {
+  const bgm = document.getElementById('bgm');
+  if (!bgm) return;
+
+  bgm.addEventListener('ended', () => {
+    if (currentScene !== 'future') return;
+
+    // ユーザーがスピンしていなくても、必ずピンク化＋メッセージ差し替え
+    if (!futureBgStarted) {
+      autoSpinActive = true; // 地球を自動で回し始める
+      startFutureBgTransition();
+    }
+
+    // フェードアウト（歌の余韻を残す）
+    const fadeOut = () => {
+      if (bgm.volume > 0.02) {
+        bgm.volume = Math.max(0, bgm.volume - 0.02);
+        setTimeout(fadeOut, 150);
+      } else {
+        bgm.volume = 0;
+        bgm.pause();
+      }
+    };
+    fadeOut();
+  });
 }
 
 // ============ Texture generators ============
@@ -1224,7 +1270,7 @@ window.goToZoom = function() {
   // Start zoom-in animation: earth scales up from tiny
   const zoomText = document.getElementById('zoom-text');
   const lines = [
-    'どこかの部屋　どこかの街',
+    '部屋から　街から',
     '同じ地球のどこかに　あなたはいてくれます',
   ];
   let idx = 0;
@@ -1262,6 +1308,13 @@ window.goToZoom = function() {
 };
 
 window.goToThink = function() {
+  // アカペラ再生開始 — 想う瞬間に、歌が寄り添う
+  const bgm = document.getElementById('bgm');
+  if (bgm) {
+    bgm.volume = 0.7;
+    bgm.play().catch(() => {});
+  }
+
   showScene('think');
   cameraTargetZ = getIdealCameraZ('think');
   setTimeout(() => {
@@ -1384,6 +1437,14 @@ window.goToFuture = function() {
 };
 
 window.restart = function() {
+  // アカペラもリセット
+  const bgm = document.getElementById('bgm');
+  if (bgm) {
+    bgm.pause();
+    bgm.currentTime = 0;
+    bgm.volume = 0.7;
+  }
+
   resetFutureScreenEffects();
   document.querySelector('.restart').classList.remove('show');
   document.getElementById('name-input').value = '';
@@ -1414,9 +1475,10 @@ function animate() {
   if (currentScene === 'zoom' || currentScene === 'think' || currentScene === 'message' || currentScene === 'future') {
     if (!isDragging) {
       rotationVelocity *= 0.95;
-      // Gentle auto-rotation
-      earth.rotation.y += 0.0008 + rotationVelocity;
-      clouds.rotation.y += 0.001 + rotationVelocity * 0.9;
+      // 自動スピン中はやさしい速度を維持
+      const autoSpin = (currentScene === 'future' && autoSpinActive) ? 0.006 : 0.0008;
+      earth.rotation.y += autoSpin + rotationVelocity;
+      clouds.rotation.y += autoSpin * 1.2 + rotationVelocity * 0.9;
     } else {
       earth.rotation.y += rotationVelocity;
       clouds.rotation.y += rotationVelocity * 0.9;
