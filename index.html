@@ -203,7 +203,9 @@
   #scene-opening .tap-hint {
     position: absolute;
     z-index: 3;
-    bottom: 8vh;
+    bottom: 22vh;
+    left: 50%;
+    transform: translateX(-50%);
     font-size: 0.75rem;
     letter-spacing: 0.4em;
     color: #c9c2b4;
@@ -450,15 +452,24 @@
   /* ============ JASRAC credit ============ */
   .jasrac-credit {
     position: absolute;
-    bottom: 1vh;
+    bottom: 1.2vh;
     right: 1vw;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
     font-size: 0.55rem;
     letter-spacing: 0.1em;
     color: #6a6558;
-    opacity: 0.5;
+    opacity: 0.6;
     z-index: 50;
     pointer-events: none;
     font-family: 'Shippori Mincho', serif;
+  }
+
+  .jasrac-mark {
+    width: 28px;
+    height: auto;
+    display: block;
   }
 
   /* ============ Grain overlay ============ */
@@ -473,7 +484,7 @@
   }
 </style>
 </head>
-<body>
+<body class="scene-opening">
 
 <div id="app">
   <canvas id="canvas"></canvas>
@@ -513,7 +524,10 @@
   </div>
 
   <button class="restart" id="restart-btn">back</button>
-  <div class="jasrac-credit">JASRAC許諾第J260543281号</div>
+  <div class="jasrac-credit">
+    <img src="jasrac.png" alt="Licensed by JASRAC" class="jasrac-mark">
+    <span>JASRAC許諾第J260543281号</span>
+  </div>
   <div class="grain"></div>
 </div>
 
@@ -1265,6 +1279,9 @@ function showScene(id) {
   document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active'));
   const el = document.getElementById('scene-' + id);
   if (el) el.classList.add('active');
+  // body にシーンクラスを付与（JASRACマーク透明度制御用）
+  document.body.classList.remove('scene-opening', 'scene-zoom', 'scene-think', 'scene-message', 'scene-future');
+  document.body.classList.add('scene-' + id);
   currentScene = id;
 }
 
