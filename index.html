@@ -457,13 +457,14 @@
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    font-size: 0.55rem;
+    font-size: 0.7rem;
     letter-spacing: 0.1em;
-    color: #6a6558;
-    opacity: 0.6;
+    color: #d8d2c4;
+    opacity: 0.85;
     z-index: 50;
     pointer-events: none;
     font-family: 'Shippori Mincho', serif;
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
   }
 
   .jasrac-mark {
@@ -1290,7 +1291,7 @@ window.goToZoom = function() {
   // Start zoom-in animation: earth scales up from tiny
   const zoomText = document.getElementById('zoom-text');
   const lines = [
-    '部屋から　街から',
+    'どこかの部屋　どこかの街',
     '同じ地球のどこかに　あなたはいてくれます',
   ];
   let idx = 0;
