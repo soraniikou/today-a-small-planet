@@ -267,12 +267,32 @@
   }
 
   #scene-think .prompt {
-    font-size: clamp(0.8rem, 3.04vw, 1.12rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: clamp(0.68rem, 2.6vw, 1.05rem);
     font-weight: 300;
-    letter-spacing: 0.2em;
-    line-height: 2;
-    max-width: 26ch;
+    letter-spacing: 0.14em;
+    line-height: 1.75;
+    gap: 0.45em;
+    max-width: min(92vw, 24em);
     color: #f5efe3;
+  }
+
+  #scene-think .prompt-line {
+    display: block;
+    width: 100%;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 420px) {
+    #scene-think .prompt {
+      font-size: clamp(0.58rem, 2.35vw, 0.82rem);
+      letter-spacing: 0.1em;
+    }
   }
 
   #scene-think .sub {
@@ -519,7 +539,8 @@
   <!-- Scene 4: Think of someone -->
   <div class="overlay" id="scene-think">
     <div class="prompt">
-      あなたが思う名前、伝えたいことなど<br>自由に書いてください
+      <span class="prompt-line">あなたが思う名前、伝えたいことなど</span>
+      <span class="prompt-line">自由に書いてください</span>
     </div>
     <input type="text" id="name-input" maxlength="40">
     <button class="next-btn" id="send-btn" style="opacity:1;animation:none;">send</button>
