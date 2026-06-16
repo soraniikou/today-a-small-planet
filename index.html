@@ -411,9 +411,9 @@
     bottom: 11vh;
     transform: translateX(-50%);
     z-index: 3;
-    font-size: 1.1rem;
+    font-size: 0.88rem;
     letter-spacing: 0.25em;
-    color: #f5efe3;
+    color: #7abd7e;
     font-family: 'Shippori Mincho', 'Cormorant Garamond', serif;
     opacity: 0;
     pointer-events: none;
@@ -435,6 +435,8 @@
     bottom: 3vh;
     left: 50%;
     transform: translateX(-50%);
+    z-index: 105;
+    pointer-events: auto;
     font-size: 0.7rem;
     letter-spacing: 0.3em;
     color: #c9c2b4;
@@ -669,10 +671,7 @@ function typewriteFutureClosing(el) {
   let i = 0;
   const step = () => {
     if (currentScene !== 'future') return;
-    if (i >= FUTURE_CLOSING_TEXT.length) {
-      document.querySelector('.restart').classList.add('show');
-      return;
-    }
+    if (i >= FUTURE_CLOSING_TEXT.length) return;
     el.textContent += FUTURE_CLOSING_TEXT[i];
     i++;
     futureClosingTimer = setTimeout(step, FUTURE_CHAR_MS);
@@ -1465,6 +1464,11 @@ window.goToFuture = function() {
   futureEl.style.transition = '';
 
   document.querySelector('.restart').classList.remove('show');
+  setTimeout(() => {
+    if (currentScene === 'future') {
+      document.querySelector('.restart').classList.add('show');
+    }
+  }, 3500);
 };
 
 window.restart = function() {
