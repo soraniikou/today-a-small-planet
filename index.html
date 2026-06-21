@@ -260,6 +260,21 @@
     letter-spacing: 0.4em;
   }
 
+  #send-btn {
+    border-radius: 999px;
+    padding: 0.75rem 3rem;
+    border: 1px solid #7abd7e;
+    color: #b8e8ba;
+    background: rgba(90, 160, 95, 0.22);
+  }
+
+  #send-btn:hover, #send-btn:active {
+    background: rgba(123, 189, 126, 0.38);
+    border-color: #8ed892;
+    color: #e4f7e5;
+    letter-spacing: 0.4em;
+  }
+
   /* ============ Scene 4: Someone ============ */
   #scene-think {
     justify-content: center;
@@ -360,14 +375,33 @@
   }
 
   #scene-future .center {
-    font-size: clamp(1.1rem, 4vw, 1.5rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    font-size: clamp(0.92rem, 3.4vw, 1.38rem);
     font-weight: 300;
-    letter-spacing: 0.25em;
-    line-height: 2.2;
-    max-width: 22ch;
+    letter-spacing: 0.16em;
+    line-height: 1.8;
+    gap: 0.2em;
+    max-width: min(92vw, 22em);
     color: #f5efe3;
     opacity: 0;
     animation: fadeIn 3s ease 1.5s forwards;
+  }
+
+  #scene-future .center .future-line {
+    display: block;
+    width: 100%;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 420px) {
+    #scene-future .center {
+      font-size: clamp(0.76rem, 3.1vw, 1.02rem);
+      letter-spacing: 0.11em;
+    }
   }
 
   #scene-future .center.replacing {
@@ -554,7 +588,10 @@
   <!-- Scene 6: Future -->
   <div class="overlay" id="scene-future">
     <div class="earth-spin-hint">← 触れて、まわす →</div>
-    <div class="center" id="future-text">地球は少しだけ優しくなっているかもしれない</div>
+    <div class="center" id="future-text">
+      <span class="future-line">あなたを大切に思っている人が</span>
+      <span class="future-line">どこかにいます</span>
+    </div>
   </div>
 
   <button class="restart" id="restart-btn">back</button>
@@ -599,7 +636,13 @@ let autoSpinActive = false;
 const FUTURE_BG_MS = 12000;
 const FUTURE_CHAR_MS = 285;
 const FUTURE_CLOSING_TEXT = '全ての出来事が大切な人に出会うためだった';
-const FUTURE_OPENING_TEXT = '地球は少しだけ優しくなっているかもしれない';
+const FUTURE_OPENING_LINE1 = 'あなたを大切に思っている人が';
+const FUTURE_OPENING_LINE2 = 'どこかにいます';
+
+function setFutureOpeningText(el) {
+  if (!el) return;
+  el.innerHTML = `<span class="future-line">${FUTURE_OPENING_LINE1}</span><span class="future-line">${FUTURE_OPENING_LINE2}</span>`;
+}
 const FUTURE_BG_STOPS = [
   { p: 0, hex: 0x000000 },
   { p: 0.25, hex: 0x1a0f2e },
@@ -720,7 +763,7 @@ function resetFutureScreenEffects() {
   setEarthClosingLook(false);
   const futureEl = document.getElementById('future-text');
   if (futureEl) {
-    futureEl.textContent = FUTURE_OPENING_TEXT;
+    setFutureOpeningText(futureEl);
     futureEl.classList.remove('replacing', 'is-closing');
     futureEl.style.animation = '';
     futureEl.style.opacity = '';
@@ -1478,7 +1521,7 @@ window.goToFuture = function() {
   showScene('future');
   cameraTargetZ = getIdealCameraZ('future');
   const futureEl = document.getElementById('future-text');
-  futureEl.textContent = FUTURE_OPENING_TEXT;
+  setFutureOpeningText(futureEl);
   futureEl.classList.remove('replacing', 'is-closing');
   futureEl.style.animation = '';
   futureEl.style.opacity = '';
